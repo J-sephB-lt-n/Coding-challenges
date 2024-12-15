@@ -1,6 +1,6 @@
 use regex::Regex;
 use std::{
-    fs::File,
+    fs::read_to_string,
     io::{prelude::*, BufReader},
     net::{TcpListener, TcpStream},
     path::Path,
@@ -47,21 +47,18 @@ fn handle_connection(mut stream: TcpStream) {
     // println!("Request: {http_request:#?}");
 
     let file_path = Path::new(&request_path);
-    println!("{file_path:#?}");
 
-    // let response_status_line = "HTTP/1.1 200 OK";
-    let response_status_line = if file_path.exists() && file_path.is_file() {
-        "HTTP/1.1 200 OK"
+    let http_response = if file_path.exists() && file_path.is_file() {
+        let response_status_line = "HTTP/1.1 200 OK";
+        let response_body = read_to_string(&file_path).unwrap();
+        let response_len = response_body.len();
+        format!("{response_status_line}\r\ncontent-length: {response_len}\r\n\r\n{response_body}")
     } else {
-        "HTTP/1.1 404 Not Found"
+        let response_status_line = "HTTP/1.1 404 Not Found";
+        let response_body = "<p>The requested file could not be found</p>";
+        let response_len = response_body.len();
+        format!("{response_status_line}\r\ncontent-length: {response_len}\r\n\r\n{response_body}")
     };
-    let response_contents = format!("Requested path: {request_path}");
-    let response_len = response_contents.len();
-    let http_response = format!(
-        "{response_status_line}\r\nContent-Length: {response_len}\r\n\r\n{response_contents}"
-    );
-
-
 
     match stream.write_all(http_response.as_bytes()) {
         Ok(()) => println!("Response sent successfully"),
