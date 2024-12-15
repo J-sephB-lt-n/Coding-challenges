@@ -2,6 +2,8 @@
 
 - https://doc.rust-lang.org/book/ch20-01-single-threaded.html
 
+- https://doc.rust-lang.org/rust-by-example/std_misc/file.html
+
 # Instructions
 
 ## Step 2
